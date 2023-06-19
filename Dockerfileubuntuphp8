@@ -1,0 +1,30 @@
+FROM ubuntu:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR /var/log/apache2
+
+RUN  apt-get update && apt-get -y upgrade && \
+     apt-get  install -y vim tzdata openssh-client curl zip apache2 apache2-utils php php-fpm \
+     php-cli php-curl php-mysqli php-pdo php-mysqlnd \
+     php-mbstring php-opcache php-gd php-xml php-json  php-ctype
+
+RUn cp /etc/apache2/mods-available/vhost_alias.load /etc/apache2/mods-enabled/vhost_alias.load
+RUn cp /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
+
+COPY ./apache2.conf /etc/apache2/apache2.conf
+
+RUN mkdir -p /etc/apache2/sites-enabled-ys
+COPY ./web-server.conf /etc/apache2/sites-enabled-ys/
+
+RUN mkdir -p /root/.ssh
+
+RUN mkdir -p /var/www/html
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 0755 /var/www/html
+
+COPY ./scptoys.sh /var/www/html/scptoys.sh
+
+CMD ["apache2ctl", "-D", "FOREGROUND"]
